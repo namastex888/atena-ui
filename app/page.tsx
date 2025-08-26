@@ -6,7 +6,8 @@ import { PDFViewer } from '@/components/pdf-viewer/PDFViewerAllPages';
 import { CopilotKit } from '@copilotkit/react-core';
 import { CopilotPopup, CopilotChat } from '@copilotkit/react-ui';
 import { useCopilotReadable } from '@copilotkit/react-core';
-import { BookOpen, Menu, Maximize2, Minimize2, X } from 'lucide-react';
+import { BookOpen, Menu, Minimize2, X } from 'lucide-react';
+import { CustomPopupHeader } from '@/components/chat/CustomPopupHeader';
 import { useDocumentStore } from '@/stores/document.store';
 import { useCopilotActions } from '@/lib/copilot/actions';
 import { config } from '@/lib/config/environment';
@@ -62,6 +63,37 @@ function HomeContent() {
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(
     typeof window !== 'undefined' && window.innerWidth < 1024
   );
+
+  // Handle ESC key to close popup or exit fullscreen
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isMaximized) {
+          setIsMaximized(false);
+          setSidebarOpen(true);
+        } else if (sidebarOpen) {
+          setSidebarOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [sidebarOpen, isMaximized]);
+
+  // Custom header component for the popup
+  const PopupHeader = React.useCallback(() => {
+    return (
+      <CustomPopupHeader
+        title={AtenaPrompts.chatSidebar.title}
+        onClose={() => setSidebarOpen(false)}
+        onMaximize={() => {
+          setIsMaximized(true);
+          setSidebarOpen(false);
+        }}
+      />
+    );
+  }, []);
 
   return (
     <CopilotKitProvider key={currentDocument?.id || 'no-doc'} documentId={currentDocument?.id || null}>
@@ -123,17 +155,63 @@ function HomeContent() {
           <PDFViewer onOpenChat={() => setSidebarOpen(true)} />
         </main>
 
-        {/* CopilotKit Popup - Only show when document is selected */}
-        {currentDocument && (
-          <CopilotPopup
-            defaultOpen={sidebarOpen}
-            onSetOpen={setSidebarOpen}
-            clickOutsideToClose={false}
-            labels={{
-              title: AtenaPrompts.chatSidebar.title,
-              initial: AtenaPrompts.chatSidebar.initial,
-            }}
-          />
+        {/* CopilotKit Chat Interface - Show popup or full chat based on maximized state */}
+        {currentDocument && !isMaximized && (
+          <>
+            <CopilotPopup
+              defaultOpen={sidebarOpen}
+              onSetOpen={setSidebarOpen}
+              clickOutsideToClose={true}
+              hitEscapeToClose={true}
+              labels={{
+                title: AtenaPrompts.chatSidebar.title,
+                initial: AtenaPrompts.chatSidebar.initial,
+                placeholder: "Digite sua pergunta...",
+              }}
+              Header={PopupHeader}
+            />
+          </>
+        )}
+        
+        {/* Full screen CopilotChat when maximized */}
+        {currentDocument && isMaximized && (
+          <div className="fixed inset-0 z-50 bg-white flex flex-col">
+            <div className="bg-gradient-to-r from-primary to-primary-dark text-white px-4 py-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">{AtenaPrompts.chatSidebar.title}</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setIsMaximized(false);
+                    setSidebarOpen(true);
+                  }}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Minimizar"
+                >
+                  <Minimize2 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMaximized(false);
+                    setSidebarOpen(false);
+                  }}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Fechar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <CopilotChat
+                labels={{
+                  title: AtenaPrompts.chatSidebar.title,
+                  initial: AtenaPrompts.chatSidebar.initial,
+                  placeholder: "Digite sua pergunta...",
+                }}
+                className="h-full"
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

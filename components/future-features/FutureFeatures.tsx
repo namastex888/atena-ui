@@ -1,50 +1,53 @@
 'use client';
 
 import { Mic, Brain, BarChart3, Users, FileText, Sparkles } from 'lucide-react';
+import { AtenaPrompts } from '@/lib/prompts/atena-prompts';
 
 interface FutureFeature {
   icon: React.ReactNode;
   label: string;
   description: string;
-  status: 'Em Breve' | 'Desenvolvimento' | 'Beta';
+  status: string;
 }
+
+const { features: f, status: s } = AtenaPrompts.ui.futureFeatures;
 
 const futureFeatures: FutureFeature[] = [
   {
     icon: <Mic className="w-5 h-5" />,
-    label: 'Interação por Voz',
-    description: 'Converse com a Atena usando sua voz',
-    status: 'Em Breve',
+    label: f.voiceInteraction.label,
+    description: f.voiceInteraction.description,
+    status: s.soon,
   },
   {
     icon: <Brain className="w-5 h-5" />,
-    label: 'Mapas Mentais',
-    description: 'Crie mapas mentais visuais do conteúdo',
-    status: 'Em Breve',
+    label: f.mindMaps.label,
+    description: f.mindMaps.description,
+    status: s.soon,
   },
   {
     icon: <BarChart3 className="w-5 h-5" />,
-    label: 'Analytics de Estudo',
-    description: 'Acompanhe seu progresso de aprendizado',
-    status: 'Em Breve',
+    label: f.studyAnalytics.label,
+    description: f.studyAnalytics.description,
+    status: s.soon,
   },
   {
     icon: <Users className="w-5 h-5" />,
-    label: 'Grupos de Estudo',
-    description: 'Compartilhe e estude com colegas',
-    status: 'Desenvolvimento',
+    label: f.studyGroups.label,
+    description: f.studyGroups.description,
+    status: s.development,
   },
   {
     icon: <FileText className="w-5 h-5" />,
-    label: 'Resumos Automáticos',
-    description: 'Gere resumos personalizados do conteúdo',
-    status: 'Beta',
+    label: f.summaries.label,
+    description: f.summaries.description,
+    status: s.beta,
   },
   {
     icon: <Sparkles className="w-5 h-5" />,
-    label: 'Flashcards Inteligentes',
-    description: 'Cartões de estudo gerados por IA',
-    status: 'Em Breve',
+    label: f.smartFlashcards.label,
+    description: f.smartFlashcards.description,
+    status: s.soon,
   },
 ];
 
@@ -53,10 +56,10 @@ export function FutureFeatures() {
     <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg shadow-lg">
       <div className="mb-6">
         <h3 className="text-xl font-bold text-gray-800 mb-2">
-          🚀 Funcionalidades Futuras
+          {AtenaPrompts.ui.futureFeatures.title}
         </h3>
         <p className="text-sm text-gray-600">
-          Estamos trabalhando em novas ferramentas incríveis para melhorar sua experiência de estudo!
+          {AtenaPrompts.ui.futureFeatures.subtitle}
         </p>
       </div>
 
@@ -78,9 +81,9 @@ export function FutureFeatures() {
                   </h4>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
-                      feature.status === 'Beta'
+                      feature.status === s.beta
                         ? 'bg-green-100 text-green-700'
-                        : feature.status === 'Desenvolvimento'
+                        : feature.status === s.development
                         ? 'bg-yellow-100 text-yellow-700'
                         : 'bg-gray-100 text-gray-600'
                     }`}
@@ -99,8 +102,7 @@ export function FutureFeatures() {
 
       <div className="mt-6 p-4 bg-blue-100 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-800">
-          💡 <strong>Dica:</strong> Essas funcionalidades estarão disponíveis em breve! 
-          Continue usando a Atena e aproveite as ferramentas atuais para potencializar seus estudos.
+          {AtenaPrompts.ui.futureFeatures.tip}
         </p>
       </div>
     </div>

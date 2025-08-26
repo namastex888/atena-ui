@@ -43,7 +43,7 @@ export function useCopilotActions() {
   // Action 1: Explicar conteúdo selecionado
   useCopilotAction({
     name: 'explicar',
-    description: 'Explica o conteúdo selecionado do PDF de forma simples e didática',
+    description: AtenaPrompts.copilotActions.explicar.description,
     parameters: [
       {
         name: 'conteudo',
@@ -64,7 +64,7 @@ export function useCopilotActions() {
   // Action 2: Gerar exemplos práticos
   useCopilotAction({
     name: 'exemplos',
-    description: 'Gera exemplos práticos e situações reais sobre o conteúdo',
+    description: AtenaPrompts.copilotActions.exemplos.description,
     parameters: [
       {
         name: 'topico',
@@ -84,7 +84,7 @@ export function useCopilotActions() {
   // Action 3: Quiz Me - Gerar questões de prática com Generative UI
   useCopilotAction({
     name: 'createQuiz',
-    description: 'Cria um quiz interativo com questões de múltipla escolha sobre o conteúdo do documento',
+    description: AtenaPrompts.copilotActions.createQuiz.description,
     parameters: [
       {
         name: 'topic',
@@ -133,7 +133,7 @@ export function useCopilotActions() {
               <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2"></div>
             </div>
-            <p className="text-sm text-gray-600 mt-2">Gerando quiz...</p>
+            <p className="text-sm text-gray-600 mt-2">{AtenaPrompts.copilotActions.createQuiz.generatingMessage}</p>
           </div>
         );
       }
@@ -147,7 +147,7 @@ export function useCopilotActions() {
   // Action 4: Mostrar funcionalidades futuras
   useCopilotAction({
     name: 'showFutureFeatures',
-    description: 'Mostra as funcionalidades que estão em desenvolvimento ou planejadas',
+    description: AtenaPrompts.copilotActions.showFutureFeatures.description,
     parameters: [],
     render: () => {
       const FutureFeatures = require('@/components/future-features/FutureFeatures').FutureFeatures;
@@ -158,7 +158,7 @@ export function useCopilotActions() {
   // Action 5: Navigate to specific page
   useCopilotAction({
     name: 'navigateToPage',
-    description: 'Navega para uma página específica do PDF',
+    description: AtenaPrompts.copilotActions.navigateToPage.description,
     parameters: [
       {
         name: 'pageNumber',
@@ -171,13 +171,13 @@ export function useCopilotActions() {
       if (pageNumber < 1 || pageNumber > totalPages) {
         return {
           success: false,
-          message: `Página inválida. O documento tem ${totalPages} páginas.`,
+          message: AtenaPrompts.copilotActions.navigateToPage.invalidPage(totalPages),
         };
       }
       setCurrentPage(pageNumber);
       return {
         success: true,
-        message: `Navegando para página ${pageNumber} de ${totalPages}`,
+        message: AtenaPrompts.copilotActions.navigateToPage.navigatingTo(pageNumber, totalPages),
       };
     },
   });
@@ -185,20 +185,20 @@ export function useCopilotActions() {
   // Action 6: Go to next page
   useCopilotAction({
     name: 'nextPage',
-    description: 'Vai para a próxima página do PDF',
+    description: AtenaPrompts.copilotActions.nextPage.description,
     parameters: [],
     handler: async () => {
       if (currentPage >= totalPages) {
         return {
           success: false,
-          message: 'Você já está na última página',
+          message: AtenaPrompts.copilotActions.nextPage.lastPageMessage,
         };
       }
       const nextPage = currentPage + 1;
       setCurrentPage(nextPage);
       return {
         success: true,
-        message: `Indo para página ${nextPage} de ${totalPages}`,
+        message: AtenaPrompts.copilotActions.nextPage.goingToPage(nextPage, totalPages),
       };
     },
   });
@@ -206,20 +206,20 @@ export function useCopilotActions() {
   // Action 7: Go to previous page
   useCopilotAction({
     name: 'previousPage',
-    description: 'Vai para a página anterior do PDF',
+    description: AtenaPrompts.copilotActions.previousPage.description,
     parameters: [],
     handler: async () => {
       if (currentPage <= 1) {
         return {
           success: false,
-          message: 'Você já está na primeira página',
+          message: AtenaPrompts.copilotActions.previousPage.firstPageMessage,
         };
       }
       const prevPage = currentPage - 1;
       setCurrentPage(prevPage);
       return {
         success: true,
-        message: `Voltando para página ${prevPage} de ${totalPages}`,
+        message: AtenaPrompts.copilotActions.previousPage.goingBackToPage(prevPage, totalPages),
       };
     },
   });

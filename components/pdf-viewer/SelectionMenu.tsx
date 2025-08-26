@@ -145,9 +145,9 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
           <BookOpen className="w-4 h-4 text-blue-600 group-hover:text-blue-700 pointer-events-none" />
           <div className="text-left pointer-events-none">
             <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-              Explicar
+              {AtenaPrompts.ui.selectionMenu.explicar.label}
             </p>
-            <p className="text-xs text-gray-500">Explicação clara e direta</p>
+            <p className="text-xs text-gray-500">{AtenaPrompts.ui.selectionMenu.explicar.description}</p>
           </div>
         </button>
 
@@ -160,9 +160,9 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
           <Lightbulb className="w-4 h-4 text-yellow-600 group-hover:text-yellow-700 pointer-events-none" />
           <div className="text-left pointer-events-none">
             <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-              Exemplos
+              {AtenaPrompts.ui.selectionMenu.exemplos.label}
             </p>
-            <p className="text-xs text-gray-500">Casos práticos e reais</p>
+            <p className="text-xs text-gray-500">{AtenaPrompts.ui.selectionMenu.exemplos.description}</p>
           </div>
         </button>
 
@@ -175,9 +175,9 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
           <HelpCircle className="w-4 h-4 text-green-600 group-hover:text-green-700 pointer-events-none" />
           <div className="text-left pointer-events-none">
             <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-              Quiz Me
+              {AtenaPrompts.ui.selectionMenu.quiz.label}
             </p>
-            <p className="text-xs text-gray-500">Teste seu conhecimento</p>
+            <p className="text-xs text-gray-500">{AtenaPrompts.ui.selectionMenu.quiz.description}</p>
           </div>
         </button>
       </div>
