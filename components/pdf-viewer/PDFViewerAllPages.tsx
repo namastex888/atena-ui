@@ -215,11 +215,11 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
 
   if (!currentDocument) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="text-center p-8 max-w-md">
-          <div className="mb-6">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
+        <div className="p-8 max-w-4xl">
+          <div className="mb-8 text-center">
             <svg 
-              className="w-24 h-24 mx-auto text-gray-300"
+              className="w-20 h-20 mx-auto text-primary-400 mb-4"
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -228,21 +228,65 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
                 strokeWidth={1.5}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" 
               />
             </svg>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Olá, estudante! Prepare-se para começar sua jornada de estudos.
+            </h2>
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            Nenhum documento selecionado
-          </h3>
-          <p className="text-gray-500 mb-6">
-            Escolha um dos documentos teóricos disponíveis na barra lateral para começar seus estudos
-          </p>
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+          
+          <div className="prose prose-gray max-w-none text-justify space-y-4 text-gray-600">
+            <p className="leading-relaxed">
+              A disciplina <strong>Algoritmo e Pensamento Computacional</strong> oferece uma formação completa e sistemática para profissionais que desejam dominar a arte e a 
+              ciência de resolver problemas computacionais de forma estruturada e eficiente. Esta disciplina foi desenvolvida para capacitar estudantes desde os 
+              fundamentos do pensamento lógico até técnicas avançadas de programação, proporcionando as competências essenciais para criar soluções algorítmicas 
+              robustas que atendam às demandas tecnológicas contemporâneas.
+            </p>
+            
+            <p className="leading-relaxed">
+              O curso está organizado em uma progressão lógica que combina fundamentos teóricos sólidos com implementações práticas intensivas. Iniciamos com os 
+              fundamentos da programação e pensamento computacional, explorando raciocínio lógico-matemático, características das linguagens de programação e 
+              manipulação de dados em linguagem C. A segunda etapa foca nas estruturas de decisão, controle e repetição, desenvolvendo habilidades para criar 
+              programas que tomam decisões inteligentes e executam tarefas repetitivas automaticamente.
+            </p>
+            
+            <p className="leading-relaxed">
+              A terceira unidade aprofunda as estruturas de dados e arquivos, abordando arrays, manipulação de arquivos, funções, modularização e o poderoso 
+              conceito de ponteiros. A jornada culmina com algoritmos de ordenação, explorando desde métodos simples como Bubble Sort até técnicas recursivas 
+              avançadas como Quick Sort, analisando complexidade e aplicações práticas.
+            </p>
+            
+            <p className="leading-relaxed">
+              A metodologia adotada enfatiza a aplicação imediata de conceitos através de exercícios práticos, projetos que simulam cenários reais e estudos de caso 
+              que demonstram a relevância dos algoritmos no desenvolvimento de sistemas. Cada tópico é apresentado com exemplos concretos, desde a 
+              implementação de lógicas simples até o desenvolvimento de sistemas completos de gestão.
+            </p>
+            
+            <p className="leading-relaxed">
+              A relevância desta disciplina é fundamental no contexto atual, onde algoritmos são a base de todas as inovações tecnológicas. Desde inteligência artificial 
+              até sistemas embarcados, desde aplicações móveis até computação em nuvem, o domínio de algoritmos e pensamento computacional determina a 
+              capacidade de criar soluções eficientes e escaláveis que impactam diretamente a experiência do usuário e o sucesso de projetos tecnológicos.
+            </p>
+            
+            <div className="mt-6 p-4 bg-primary-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-primary-900 mb-3">Objetivos Gerais:</h3>
+              <p className="leading-relaxed text-gray-700">
+                Desenvolver competências abrangentes em algoritmos e pensamento computacional, capacitando os estudantes a aplicar raciocínio lógico-matemático 
+                para resolver problemas computacionais, dominar os fundamentos da linguagem C incluindo estruturas de controle e manipulação de dados, implementar 
+                estruturas de dados eficientes e técnicas de modularização de código, analisar e implementar algoritmos de ordenação considerando complexidade e 
+                aplicabilidade, e estabelecer fundamentos sólidos para especialização em áreas como desenvolvimento de sistemas, inteligência artificial, computação 
+                científica e engenharia de software, preparando profissionais completos para criar soluções algorítmicas eficientes e escaláveis no mercado atual de 
+                tecnologia da informação.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500 border-t pt-6">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Selecione o texto no PDF para interagir com a Atena</span>
+            <span>Selecione um documento na barra lateral para começar</span>
           </div>
         </div>
       </div>
