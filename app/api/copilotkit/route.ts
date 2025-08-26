@@ -19,7 +19,13 @@ export const POST = async (req: NextRequest) => {
   try {
     console.log('[CopilotKit API] Received request');
     console.log('[CopilotKit API] API Key exists:', !!process.env.OPENAI_API_KEY);
-    console.log('[CopilotKit API] Headers:', Object.fromEntries(req.headers.entries()));
+    console.log('[CopilotKit API] API Key length:', process.env.OPENAI_API_KEY?.length);
+    
+    // Log the request body for debugging
+    const clonedReq = req.clone();
+    const body = await clonedReq.text();
+    console.log('[CopilotKit API] Request body length:', body.length);
+    console.log('[CopilotKit API] Request body preview:', body.substring(0, 200));
     
     const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
       runtime,
@@ -35,6 +41,7 @@ export const POST = async (req: NextRequest) => {
     return response;
   } catch (error) {
     console.error('[CopilotKit API] Error:', error);
+    console.error('[CopilotKit API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       { 
         error: 'Internal server error', 
