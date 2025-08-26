@@ -57,7 +57,7 @@ function CopilotKitProvider({ documentId, children }: { documentId: string | nul
 }
 
 function HomeContent() {
-  const { currentDocument } = useDocumentStore();
+  const { currentDocument, currentPage, totalPages } = useDocumentStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(
@@ -163,6 +163,13 @@ function HomeContent() {
               onSetOpen={setSidebarOpen}
               clickOutsideToClose={true}
               hitEscapeToClose={true}
+              instructions={AtenaPrompts.systemContext.getInstructions(
+                currentDocument ? {
+                  name: currentDocument.name,
+                  currentPage,
+                  totalPages
+                } : null
+              )}
               labels={{
                 title: AtenaPrompts.chatSidebar.title,
                 initial: AtenaPrompts.chatSidebar.initial,
@@ -203,6 +210,13 @@ function HomeContent() {
             </div>
             <div className="flex-1 overflow-hidden">
               <CopilotChat
+                instructions={AtenaPrompts.systemContext.getInstructions(
+                  currentDocument ? {
+                    name: currentDocument.name,
+                    currentPage,
+                    totalPages
+                  } : null
+                )}
                 labels={{
                   title: AtenaPrompts.chatSidebar.title,
                   initial: AtenaPrompts.chatSidebar.initial,

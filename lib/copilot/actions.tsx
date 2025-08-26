@@ -28,9 +28,27 @@ export function useCopilotActions() {
   });
   
   // Generate suggestions based on current document state
-  // Suggestions will regenerate due to component remount and dependency changes
+  // Use inline instructions with emojis as this approach was working before
   useCopilotChatSuggestions({
-    instructions: AtenaPrompts.suggestions.getContextualInstructions(),
+    instructions: currentDocument && extractedText 
+      ? `Baseado no conteúdo da página ${currentPage} de ${totalPages} do documento ${currentDocument.name}, sugira 4 ações de estudo relevantes:
+      
+      Conteúdo atual: ${extractedText.substring((currentPage - 1) * 1000, currentPage * 1000).slice(0, 300)}...
+      
+      IMPORTANTE: Cada sugestão DEVE começar com um emoji. Exemplos:
+      - 📚 Resumir [tópico específico da página]
+      - 💭 Explicar [conceito mencionado]
+      - 🎯 Questões sobre [assunto da página]  
+      - 🔍 Analisar [elemento do conteúdo]
+      - 🔬 Detalhar [teoria apresentada]
+      - ✏️ Exercícios sobre [tema]
+      
+      As sugestões devem ser curtas, específicas ao conteúdo atual e em português brasileiro.`
+      : `Sugira 4 ações de estudo. CADA uma DEVE começar com emoji:
+      📚 Resumir conceitos principais
+      💭 Explicar fundamentos teóricos
+      🎯 Criar quiz de revisão
+      🔍 Analisar pontos importantes`,
     minSuggestions: 4,
     maxSuggestions: 4,
     available: currentDocument && extractedText ? 'enabled' : 'disabled',
