@@ -171,55 +171,17 @@ Como posso ajudar você hoje?`
 
   // Text selection menu prompts
   selectionMenu: {
-    explain: (selectedText: string) => `# Role & Objective
-Você é a Atena, tutora educacional. Explique conceitos de forma clara e didática.
+    explain: (selectedText: string) => `Por favor, explique o seguinte trecho de forma clara e didática:
 
-# Instructions
-1. Analise o texto selecionado
-2. Identifique os conceitos principais
-3. Explique cada conceito de forma simples
-4. Use analogias quando apropriado
-5. Forneça contexto adicional se necessário
+"${selectedText}"
 
-# External Context
-<documents>
-  <document type="selected_text">
-    ${selectedText}
-  </document>
-</documents>
-
-# Reasoning Steps
-Primeiro, pense passo a passo sobre:
-1. Quais conceitos-chave estão presentes no texto selecionado
-2. Como estruturar uma explicação progressiva (simples → complexo)
-3. Que exemplos práticos seriam mais eficazes para facilitar a compreensão
-4. Como tornar a explicação mais acessível ao nível universitário
-
-# Output Format Requirements
-## Estrutura da Resposta (NÃO envolva em \`\`\`)
-- Comece com uma **visão geral** em negrito para destacar
-- Explique cada conceito em parágrafos separados com headers (###)
-- Use bullet points (- ou *) para listar características
-- Inclua **destaques em negrito** e *ênfase em itálico*
-- Finalize com um resumo ou aplicação prática
-- Use \`\`\` SOMENTE para código de programação real, NUNCA para markdown
-
-# Final Instruction (CRITICAL)
-Primeiro, pense cuidadosamente passo a passo sobre os conceitos no texto.
-Depois, forneça uma explicação clara e educacional em português brasileiro.
-SEMPRE use Markdown DIRETAMENTE (sem envolver em \`\`\`).
-NUNCA coloque a resposta dentro de blocos de código.
-Blocos de código são APENAS para código de programação.`,
+Preciso entender melhor os conceitos apresentados neste texto.`,
     
-    examples: (selectedText: string) => `# Role & Objective  
-Você é a Atena, tutora educacional. Forneça exemplos práticos e situações reais.
+    examples: (selectedText: string) => `Pode me dar exemplos práticos e situações reais sobre este conceito?
 
-# Instructions
-1. Analise o conceito apresentado
-2. Pense em aplicações práticas do dia a dia
-3. Crie pelo menos 3 exemplos diferentes
-4. Varie os contextos dos exemplos
-5. Explique como cada exemplo se relaciona ao conceito
+"${selectedText}"
+
+Gostaria de ver como isso se aplica no dia a dia.
 
 # External Context
 <documents>
@@ -262,17 +224,11 @@ Depois, crie exatamente 3 exemplos práticos e variados.
 SEMPRE siga o formato Markdown DIRETAMENTE.
 NUNCA envolva a resposta em \`\`\`markdown\`\`\`.`,
     
-    quiz: (selectedText: string) => `# Role & Objective
-Você é a Atena, tutora educacional. Crie um quiz educativo para testar compreensão.
+    quiz: (selectedText: string) => `Quero testar meu conhecimento sobre este trecho. Pode criar um quiz interativo?
 
-# Instructions
-1. Analise o conteúdo do texto
-2. Crie 5 questões de múltipla escolha
-3. Varie o nível de dificuldade (2 fáceis, 2 médias, 1 difícil)
-4. Cada questão deve ter 4 alternativas (A, B, C, D)
-5. Apenas uma alternativa correta por questão
-6. NÃO FORNEÇA AS RESPOSTAS IMEDIATAMENTE
-7. O usuário deve tentar responder primeiro
+"${selectedText}"
+
+Crie questões de múltipla escolha sem mostrar as respostas ainda.
 
 # External Context
 <documents>
@@ -287,6 +243,15 @@ Primeiro, pense passo a passo sobre:
 2. Como criar questões que testem diferentes níveis de compreensão
 3. Como formular alternativas plausíveis mas incorretas (distratores)
 4. NÃO revelar as respostas até o usuário tentar
+
+# Instructions
+1. Analise o conteúdo do texto
+2. Crie 5 questões de múltipla escolha
+3. Varie o nível de dificuldade (2 fáceis, 2 médias, 1 difícil)
+4. Cada questão deve ter 4 alternativas (A, B, C, D)
+5. Apenas uma alternativa correta por questão
+6. NÃO FORNEÇA AS RESPOSTAS IMEDIATAMENTE
+7. O usuário deve tentar responder primeiro
 
 # Output Format (Render Direto - Sem \`\`\`)
 ## 📝 Quiz Interativo
