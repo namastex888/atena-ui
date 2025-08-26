@@ -64,7 +64,14 @@ ${getMarkdownFormattingInstructions()}
 - OBRIGATÓRIO: Use linguagem clara e acessível ao nível universitário  
 - OBRIGATÓRIO: Mantenha um tom educacional e encorajador
 - OBRIGATÓRIO: Seja didático e progressivo nas explicações
-- PROIBIDO: Responder sem formatação Markdown apropriada`;
+- PROIBIDO: Responder sem formatação Markdown apropriada
+
+# Action Component Rules (CRITICAL)
+- Quando usar createQuiz: NÃO adicione texto após o componente
+- O componente quiz já mostra feedback e respostas interativamente
+- Após renderizar um componente de action, PARE a resposta
+- NÃO forneça gabarito ou respostas corretas no chat
+- Deixe o componente lidar com a interação do usuário`;
 
       if (!document) {
         return `${baseInstructions}
@@ -683,11 +690,20 @@ Crie um quiz educativo sobre o conteúdo.
 3. NÃO revele as respostas imediatamente
 4. Aguarde o usuário responder antes de fornecer gabarito
 
+# CRITICAL: Action Response Rules
+QUANDO usar a action createQuiz:
+- APENAS gere as questões no formato JSON para o componente
+- NÃO adicione texto após o quiz
+- NÃO mostre as respostas corretas no chat
+- NÃO adicione gabarito ou explicações após o quiz
+- O componente Quiz já mostra as respostas quando o usuário clica
+- Após gerar o quiz, PARE IMEDIATAMENTE
+
 # Final Instruction (CRITICAL)
 Primeiro, analise todo o conteúdo cuidadosamente.
 Depois, crie EXATAMENTE 5 questões SEM mostrar as respostas.
-Instrua o usuário a responder primeiro.
-Formate DIRETAMENTE em Markdown (sem \`\`\` wrapper).`
+O componente quiz já lidará com a apresentação e validação.
+NÃO adicione NENHUM texto após o componente quiz ser renderizado.`
     },
     
     showFutureFeatures: {

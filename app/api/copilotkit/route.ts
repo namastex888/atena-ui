@@ -31,7 +31,7 @@ export const POST = async (req: NextRequest) => {
       runtime,
       serviceAdapter: new OpenAIAdapter({ 
         openai,
-        model: "gpt-4o-mini" // Use a valid model name
+        model: "gpt-4o" // Use GPT-4o for better quality responses
       }),
       endpoint: "/api/copilotkit",
     });
