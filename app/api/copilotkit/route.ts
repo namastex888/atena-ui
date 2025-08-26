@@ -4,7 +4,7 @@ import {
   copilotRuntimeNextJSAppRouterEndpoint,
 } from "@copilotkit/runtime";
 import OpenAI from "openai";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // Create the OpenAI client
 const openai = new OpenAI({
@@ -19,6 +19,7 @@ export const POST = async (req: NextRequest) => {
   try {
     console.log('[CopilotKit API] Received request');
     console.log('[CopilotKit API] API Key exists:', !!process.env.OPENAI_API_KEY);
+    console.log('[CopilotKit API] Headers:', Object.fromEntries(req.headers.entries()));
     
     const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
       runtime,
@@ -34,15 +35,20 @@ export const POST = async (req: NextRequest) => {
     return response;
   } catch (error) {
     console.error('[CopilotKit API] Error:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error', 
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }), 
+    return NextResponse.json(
       { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        error: 'Internal server error', 
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : undefined
+      }, 
+      { 
+        status: 500
       }
     );
   }
+};
+
+// Handle OPTIONS for CORS preflight
+export const OPTIONS = async (req: NextRequest) => {
+  return new NextResponse(null, { status: 200 });
 };
