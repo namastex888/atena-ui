@@ -16,14 +16,33 @@ const runtime = new CopilotRuntime();
 
 // Build a Next.js API route that handles the CopilotKit runtime requests
 export const POST = async (req: NextRequest) => {
-  const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
-    runtime,
-    serviceAdapter: new OpenAIAdapter({ 
-      openai,
-      model: "gpt-4.1"
-    }),
-    endpoint: "/api/copilotkit",
-  });
-  
-  return await handleRequest(req);
+  try {
+    console.log('[CopilotKit API] Received request');
+    console.log('[CopilotKit API] API Key exists:', !!process.env.OPENAI_API_KEY);
+    
+    const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
+      runtime,
+      serviceAdapter: new OpenAIAdapter({ 
+        openai,
+        model: "gpt-4o-mini" // Use a valid model name
+      }),
+      endpoint: "/api/copilotkit",
+    });
+    
+    const response = await handleRequest(req);
+    console.log('[CopilotKit API] Response status:', response.status);
+    return response;
+  } catch (error) {
+    console.error('[CopilotKit API] Error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }), 
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
 };
