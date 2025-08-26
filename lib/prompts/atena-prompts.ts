@@ -29,14 +29,26 @@ export const AtenaPrompts = {
   // Document context description
   documentContext: {
     description: "Documento PDF atual sendo estudado pelo aluno",
-    getDocumentData: (document: any, extractedText: string, currentPage: number, totalPages: number) => ({
-      documentName: document.name,
-      documentPath: document.path,
-      fullContent: extractedText || 'Carregando conteúdo do PDF...',
-      currentPage: currentPage,
-      totalPages: totalPages,
-      documentType: 'Teórico' // Based on the document naming convention
-    })
+    getDocumentData: (document: any, extractedText: string, currentPage: number, totalPages: number) => {
+      // Extract content for current page (approximately 3000 chars per page)
+      const pageStart = (currentPage - 1) * 3000;
+      const pageEnd = currentPage * 3000;
+      const currentPageContent = extractedText 
+        ? extractedText.substring(pageStart, pageEnd)
+        : 'Carregando conteúdo...';
+      
+      return {
+        documentName: document.name,
+        currentPage: currentPage,
+        totalPages: totalPages,
+        currentPageContent: currentPageContent,
+        // Include some context from previous and next pages
+        contextWindow: extractedText 
+          ? extractedText.substring(Math.max(0, pageStart - 500), Math.min(extractedText.length, pageEnd + 500))
+          : '',
+        documentType: 'Teórico'
+      };
+    }
   },
 
   // Chat sidebar labels
@@ -59,6 +71,26 @@ export const AtenaPrompts = {
 
   // Suggestions prompts (for auto-suggestions feature)
   suggestions: {
+    // Generate contextual suggestions based on PDF content
+    getContextualInstructions: () => `ANALISE O CONTEXTO FORNECIDO e gere 4 sugestões.
+       
+       SE currentPageContent EXISTE no contexto:
+       Gere sugestões ESPECÍFICAS baseadas no conteúdo real:
+       📚 Resumir [tópico do texto]
+       🎯 Questões sobre [conceito visível]
+       💭 Explicar [termo presente]
+       🔍 Analisar [assunto da página]
+       
+       SE currentPageContent NÃO existe ou está vazio:
+       Return null (o chat não deve estar disponível)
+       
+       REGRAS CRÍTICAS:
+       - Use SOMENTE o que está em currentPageContent
+       - Máximo 5 palavras por sugestão
+       - Português brasileiro
+       - Mencione elementos REAIS do texto, não invente`,
+    
+    // Legacy contextual suggestions (for backward compatibility)
     contextual: (documentName: string, currentPage: number) => [
       `Explique os conceitos principais da página ${currentPage}`,
       `Quais são os pontos mais importantes deste capítulo?`,

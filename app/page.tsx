@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DocumentList } from '@/components/sidebar/DocumentList';
 import { PDFViewer } from '@/components/pdf-viewer/PDFViewerAllPages';
 import { CopilotKit } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
-import { useCopilotReadable, useCopilotContext } from '@copilotkit/react-core';
-import { BookOpen } from 'lucide-react';
+import { CopilotPopup, CopilotChat } from '@copilotkit/react-ui';
+import { useCopilotReadable } from '@copilotkit/react-core';
+import { BookOpen, Menu, Maximize2, Minimize2, X } from 'lucide-react';
 import { useDocumentStore } from '@/stores/document.store';
 import { useCopilotActions } from '@/lib/copilot/actions';
 import { config } from '@/lib/config/environment';
@@ -21,11 +21,11 @@ function generateUUID() {
   });
 }
 
-function HomeContent() {
-  const { currentDocument, extractedText, currentPage, totalPages } = useDocumentStore();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+// Separate component for CopilotKit context that remounts on document change
+function CopilotKitProvider({ documentId, children }: { documentId: string | null, children: React.ReactNode }) {
   // Share current document context with the Agno agent
+  const { currentDocument, extractedText, currentPage, totalPages } = useDocumentStore();
+  
   useCopilotReadable({
     description: AtenaPrompts.documentContext.description,
     value: currentDocument ? 
@@ -38,8 +38,9 @@ function HomeContent() {
   });
   
   // Provide instructions context for the agent
-  useCopilotContext({
-    instructions: AtenaPrompts.systemContext.getInstructions(
+  useCopilotReadable({
+    description: "System instructions for the assistant",
+    value: AtenaPrompts.systemContext.getInstructions(
       currentDocument ? {
         name: currentDocument.name,
         currentPage,
@@ -50,37 +51,81 @@ function HomeContent() {
   
   // Register contextual actions
   useCopilotActions();
+  
+  return <>{children}</>;
+}
+
+function HomeContent() {
+  const { currentDocument } = useDocumentStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  );
 
   return (
-    <div className="h-screen flex flex-col">
+    <CopilotKitProvider key={currentDocument?.id || 'no-doc'} documentId={currentDocument?.id || null}>
+      <div className="h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-4 shadow-lg">
+      <header className="bg-gradient-to-r from-primary to-primary-dark text-white px-4 sm:px-6 py-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
             <BookOpen className="w-8 h-8" />
             <div>
-              <h1 className="text-2xl font-bold">Atena UI</h1>
-              <p className="text-sm text-primary-100">Assistente Inteligente de Documentos</p>
+              <h1 className="text-xl sm:text-2xl font-bold">Atena AI</h1>
+              <p className="text-xs sm:text-sm text-primary-100 hidden sm:block">Seu tutor inteligente para dominar qualquer conteúdo</p>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
+      <div className="flex-1 flex overflow-hidden relative" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Sidebar - Document List */}
-        <aside className="w-64 flex-shrink-0 h-full">
-          <DocumentList />
+        <aside className={`
+          ${leftSidebarCollapsed ? 'w-0' : 'w-64'} 
+          absolute lg:relative
+          z-20 lg:z-auto
+          bg-white
+          h-full
+          transition-all duration-300 ease-in-out
+          flex-shrink-0
+          overflow-hidden
+          ${!leftSidebarCollapsed ? 'shadow-lg lg:shadow-none' : ''}
+        `}>
+          <DocumentList onDocumentSelect={() => {
+            // Close sidebar on mobile when a document is selected
+            if (window.innerWidth < 1024) {
+              setLeftSidebarCollapsed(true);
+            }
+          }} />
         </aside>
+        
+        {/* Overlay for mobile when sidebar is open */}
+        {!leftSidebarCollapsed && (
+          <div 
+            className="lg:hidden absolute inset-0 bg-black/50 z-10"
+            onClick={() => setLeftSidebarCollapsed(true)}
+          />
+        )}
 
         {/* PDF Viewer */}
         <main className="flex-1 min-w-0 h-full overflow-hidden">
           <PDFViewer onOpenChat={() => setSidebarOpen(true)} />
         </main>
 
-        {/* CopilotKit Sidebar - Only show when document is selected */}
+        {/* CopilotKit Popup - Only show when document is selected */}
         {currentDocument && (
-          <CopilotSidebar
+          <CopilotPopup
             defaultOpen={sidebarOpen}
             onSetOpen={setSidebarOpen}
             clickOutsideToClose={false}
@@ -88,11 +133,11 @@ function HomeContent() {
               title: AtenaPrompts.chatSidebar.title,
               initial: AtenaPrompts.chatSidebar.initial,
             }}
-            className="w-96 flex-shrink-0"
           />
         )}
       </div>
     </div>
+    </CopilotKitProvider>
   );
 }
 
@@ -123,6 +168,7 @@ export default function Home() {
   return (
     <CopilotKit 
       runtimeUrl="/api/copilotkit"
+      showDevConsole={false}
     >
       <HomeContent />
     </CopilotKit>

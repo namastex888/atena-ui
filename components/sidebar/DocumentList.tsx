@@ -14,7 +14,11 @@ const availableDocuments: Document[] = [
   { id: '4', name: 'IV - Teórico', path: '/documents/IV_Teorico.pdf' },
 ];
 
-export function DocumentList() {
+interface DocumentListProps {
+  onDocumentSelect?: () => void;
+}
+
+export function DocumentList({ onDocumentSelect }: DocumentListProps = {}) {
   const { currentDocument, setCurrentDocument, setDocuments } = useDocumentStore();
 
   useEffect(() => {
@@ -32,7 +36,10 @@ export function DocumentList() {
           {availableDocuments.map((doc) => (
             <button
               key={doc.id}
-              onClick={() => setCurrentDocument(doc)}
+              onClick={() => {
+                setCurrentDocument(doc);
+                onDocumentSelect?.();
+              }}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all",
                 "hover:bg-primary-50 hover:text-primary-700",

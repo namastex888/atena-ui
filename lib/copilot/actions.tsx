@@ -1,29 +1,45 @@
 'use client';
 
-import { useCopilotAction } from '@copilotkit/react-core';
+import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
 import { useCopilotChatSuggestions } from '@copilotkit/react-ui';
 import { useDocumentStore } from '@/stores/document.store';
+import { AtenaPrompts } from '@/lib/prompts/atena-prompts';
+import { useEffect, useState } from 'react';
 
 export function useCopilotActions() {
   const { setCurrentPage, totalPages, currentPage, currentDocument, extractedText } = useDocumentStore();
+  const [suggestionKey, setSuggestionKey] = useState(0);
   
-  // Configure contextual Portuguese suggestions based on current page content
+  // Force suggestion regeneration when document changes or text is extracted
+  useEffect(() => {
+    if (currentDocument && extractedText) {
+      setSuggestionKey(prev => prev + 1);
+    }
+  }, [currentDocument?.id, extractedText?.length]);
+  
+  // Provide current page content as readable context for the AI
+  const pageContent = extractedText && currentDocument 
+    ? extractedText.substring((currentPage - 1) * 3000, currentPage * 3000)
+    : '';
+    
+  useCopilotReadable({
+    description: "Current PDF page content",
+    value: pageContent || 'No document loaded'
+  });
+  
+  // Generate suggestions based on current document state
+  // Suggestions will regenerate due to component remount and dependency changes
   useCopilotChatSuggestions({
-    instructions: `Baseado no conteúdo do ${currentDocument?.name || 'documento'} (página ${currentPage}/${totalPages}), sugira 3 ações de estudo relevantes e específicas:
-    
-    Contexto do documento atual: ${extractedText?.substring((currentPage - 1) * 1000, currentPage * 1000) || ''}
-    
-    Gere sugestões como:
-    - 📚 Resumir [tópico específico da página]
-    - 🎯 Questões sobre [conceito presente na página]  
-    - 💭 Explicar [termo técnico encontrado]
-    - 🔍 Aprofundar [assunto mencionado]
-    - 🧪 Exemplos práticos de [teoria apresentada]
-    
-    As sugestões devem ser curtas, específicas ao conteúdo atual e em português brasileiro.`,
-    minSuggestions: 3,
-    maxSuggestions: 3,
-  }, [currentPage, currentDocument, extractedText]);
+    instructions: AtenaPrompts.suggestions.getContextualInstructions(),
+    minSuggestions: 4,
+    maxSuggestions: 4,
+    available: currentDocument && extractedText ? 'enabled' : 'disabled',
+  }, [
+    `${currentDocument?.id}-${suggestionKey}`, // Combined key for change detection
+    currentDocument?.name,
+    currentPage,
+    extractedText?.slice(0, 500)
+  ]);
   // Action 1: Explicar conteúdo selecionado
   useCopilotAction({
     name: 'explicar',

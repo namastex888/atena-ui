@@ -108,9 +108,11 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
     const handleTextSelection = (e: MouseEvent) => {
       // Check if the click is on the selection menu itself
       const target = e.target as HTMLElement;
-      const selectionMenu = target.closest('[data-selection-menu]');
-      if (selectionMenu) {
-        return; // Don't clear selection when clicking on menu
+      if (target && typeof target.closest === 'function') {
+        const selectionMenu = target.closest('[data-selection-menu]');
+        if (selectionMenu) {
+          return; // Don't clear selection when clicking on menu
+        }
       }
       
       // Check if selection is within PDF container
