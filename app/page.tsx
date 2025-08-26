@@ -63,6 +63,7 @@ function HomeContent() {
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(
     typeof window !== 'undefined' && window.innerWidth < 1024
   );
+  const [popupKey, setPopupKey] = useState(0);
 
   // Handle ESC key to close popup or exit fullscreen
   useEffect(() => {
@@ -152,14 +153,18 @@ function HomeContent() {
 
         {/* PDF Viewer */}
         <main className="flex-1 min-w-0 h-full overflow-hidden">
-          <PDFViewer onOpenChat={() => setSidebarOpen(true)} />
+          <PDFViewer onOpenChat={() => {
+            setSidebarOpen(true);
+            setPopupKey(prev => prev + 1); // Force re-mount of CopilotPopup
+          }} />
         </main>
 
         {/* CopilotKit Chat Interface - Show popup or full chat based on maximized state */}
         {currentDocument && !isMaximized && (
           <>
             <CopilotPopup
-              open={sidebarOpen}
+              key={popupKey}
+              defaultOpen={sidebarOpen}
               onSetOpen={setSidebarOpen}
               clickOutsideToClose={true}
               hitEscapeToClose={true}
