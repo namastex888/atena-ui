@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { BookOpen, Lightbulb, HelpCircle } from 'lucide-react';
 import { useCopilotChat } from '@copilotkit/react-core';
+import { TextMessage, MessageRole } from '@copilotkit/runtime-client-gql';
 import { AtenaPrompts } from '@/lib/prompts/atena-prompts';
 
 interface SelectionMenuProps {
@@ -30,10 +31,12 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
     
     // Then append the message using centralized prompt
     setTimeout(() => {
-      appendMessage({
-        content: AtenaPrompts.selectionMenu.explain(selectedText),
-        role: "user",
-      } as any);
+      appendMessage(
+        new TextMessage({
+          content: AtenaPrompts.selectionMenu.explain(selectedText),
+          role: MessageRole.User,
+        })
+      );
     }, 200);
     
     onClose();
@@ -52,10 +55,12 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
     
     // Then append the message using centralized prompt
     setTimeout(() => {
-      appendMessage({
-        content: AtenaPrompts.selectionMenu.examples(selectedText),
-        role: "user",
-      } as any);
+      appendMessage(
+        new TextMessage({
+          content: AtenaPrompts.selectionMenu.examples(selectedText),
+          role: MessageRole.User,
+        })
+      );
     }, 200);
     
     onClose();
@@ -74,10 +79,12 @@ export function SelectionMenu({ selectedText, x, y, onClose, onOpenChat }: Selec
     
     // Then append the message using centralized prompt
     setTimeout(() => {
-      appendMessage({
-        content: AtenaPrompts.selectionMenu.quiz(selectedText),
-        role: "user",
-      } as any);
+      appendMessage(
+        new TextMessage({
+          content: AtenaPrompts.selectionMenu.quiz(selectedText),
+          role: MessageRole.User,
+        })
+      );
     }, 200);
     
     onClose();

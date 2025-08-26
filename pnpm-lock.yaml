@@ -23,6 +23,9 @@ importers:
       '@copilotkit/runtime':
         specifier: ^1.10.2
         version: 1.10.2(@ag-ui/client@0.0.36)(@ag-ui/core@0.0.36)(@ag-ui/encoder@0.0.36)(@ag-ui/proto@0.0.36)(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/client-bedrock-agent-runtime@3.873.0)(@aws-sdk/client-bedrock-runtime@3.873.0)(@aws-sdk/client-kendra@3.873.0)(@aws-sdk/credential-provider-node@3.873.0)(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.55.0)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76))(@ibm-cloud/watsonx-ai@1.6.11)(@smithy/util-utf8@2.3.0)(axios@1.11.0)(fast-xml-parser@5.2.5)(google-auth-library@8.9.0)(ibm-cloud-sdk-core@5.4.2)(ignore@5.3.2)(jsonwebtoken@9.0.2)(playwright@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(weaviate-client@3.8.1)(ws@8.18.3)
+      '@copilotkit/runtime-client-gql':
+        specifier: ^1.10.2
+        version: 1.10.2(graphql@16.11.0)(react@18.3.1)
       '@hookform/resolvers':
         specifier: 3.10.0
         version: 3.10.0(react-hook-form@7.62.0(react@18.3.1))
