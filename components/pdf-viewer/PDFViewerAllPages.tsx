@@ -1,0 +1,320 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import { useDocumentStore } from '@/stores/document.store';
+import { PDFControls } from './PDFControls';
+import { SelectionMenu } from './SelectionMenu';
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+interface PDFViewerProps {
+  onOpenChat?: () => void;
+}
+
+export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
+  const { currentDocument, currentPage, setCurrentPage, setTotalPages, zoom, setExtractedText } = useDocumentStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pageWidth, setPageWidth] = useState(0);
+  const [numPages, setNumPages] = useState(0);
+  const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  useEffect(() => {
+    const updatePageWidth = () => {
+      const containerWidth = containerRef.current?.clientWidth || 800;
+      setPageWidth(containerWidth - 48); // Subtract padding
+    };
+
+    updatePageWidth();
+    window.addEventListener('resize', updatePageWidth);
+    return () => window.removeEventListener('resize', updatePageWidth);
+  }, []);
+
+  // Scroll to page when currentPage changes
+  useEffect(() => {
+    if (pageRefs.current[currentPage] && containerRef.current) {
+      const pageElement = pageRefs.current[currentPage];
+      const container = containerRef.current;
+      
+      // Calculate the position to scroll to
+      const pageRect = pageElement.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const scrollTop = container.scrollTop + (pageRect.top - containerRect.top);
+      
+      container.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentPage]);
+
+  // Detect which page is currently visible during scroll
+  useEffect(() => {
+    let isScrolling = false;
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      if (!containerRef.current || isScrolling) return;
+      
+      // Clear the previous timeout
+      clearTimeout(scrollTimeout);
+      
+      // Set a new timeout to detect when scrolling has stopped
+      scrollTimeout = setTimeout(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        
+        const scrollTop = container.scrollTop;
+        const containerHeight = container.clientHeight;
+        
+        // Find the page that is most visible
+        for (let i = 1; i <= numPages; i++) {
+          const pageEl = pageRefs.current[i];
+          if (pageEl) {
+            const rect = pageEl.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const relativeTop = rect.top - containerRect.top;
+            
+            // If this page is in the viewport
+            if (relativeTop >= -rect.height / 2 && relativeTop < containerHeight / 2) {
+              setCurrentPage(i);
+              break;
+            }
+          }
+        }
+      }, 150); // Wait 150ms after scroll stops
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+        clearTimeout(scrollTimeout);
+      };
+    }
+  }, [numPages, setCurrentPage]);
+
+  // Handle text selection - only within PDF container
+  useEffect(() => {
+    let selectionTimeout: NodeJS.Timeout;
+    
+    const handleTextSelection = (e: MouseEvent) => {
+      // Check if the click is on the selection menu itself
+      const target = e.target as HTMLElement;
+      const selectionMenu = target.closest('[data-selection-menu]');
+      if (selectionMenu) {
+        return; // Don't clear selection when clicking on menu
+      }
+      
+      // Check if selection is within PDF container
+      const pdfContainer = document.getElementById('pdf-container');
+      
+      if (!pdfContainer || !pdfContainer.contains(target)) {
+        // Clear selection after a delay to allow menu clicks to process
+        clearTimeout(selectionTimeout);
+        selectionTimeout = setTimeout(() => {
+          setSelection(null);
+        }, 100);
+        return;
+      }
+      
+      // Clear any pending timeout
+      clearTimeout(selectionTimeout);
+      
+      // Get selected text after a small delay to ensure selection is complete
+      setTimeout(() => {
+        const selectedText = window.getSelection()?.toString().trim();
+        
+        if (selectedText && selectedText.length > 0) {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            
+            // Only show menu if selection is from PDF content
+            const container = range.commonAncestorContainer;
+            const parentElement = container.nodeType === Node.TEXT_NODE 
+              ? container.parentElement 
+              : container as HTMLElement;
+              
+            if (parentElement && pdfContainer.contains(parentElement)) {
+              setSelection({
+                text: selectedText,
+                x: rect.left + rect.width / 2,
+                y: rect.bottom + 10,
+              });
+            }
+          }
+        }
+      }, 10);
+    };
+
+    const handleClearSelection = () => {
+      // Don't clear if we have an active selection menu
+      if (selection) return;
+      
+      const selectedText = window.getSelection()?.toString().trim();
+      if (!selectedText || selectedText.length === 0) {
+        clearTimeout(selectionTimeout);
+        selectionTimeout = setTimeout(() => {
+          setSelection(null);
+        }, 100);
+      }
+    };
+
+    document.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('selectionchange', handleClearSelection);
+
+    return () => {
+      document.removeEventListener('mouseup', handleTextSelection);
+      document.removeEventListener('selectionchange', handleClearSelection);
+      clearTimeout(selectionTimeout);
+    };
+  }, [selection]);
+
+  const onDocumentLoadSuccess = async (pdf: any) => {
+    const num = pdf.numPages;
+    setNumPages(num);
+    setTotalPages(num);
+    setLoading(false);
+    setError(null);
+    
+    // Extract text from all pages
+    try {
+      let fullText = '';
+      for (let i = 1; i <= num; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += `\n--- Página ${i} ---\n${pageText}\n`;
+      }
+      setExtractedText(fullText);
+    } catch (error) {
+      console.error('Error extracting text from PDF:', error);
+      // Still set some context even if extraction fails
+      setExtractedText(`Documento: ${currentDocument?.name || 'PDF'} com ${num} páginas`);
+    }
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error('Error loading PDF:', error);
+    setError('Erro ao carregar o documento');
+    setLoading(false);
+  };
+
+  if (!currentDocument) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center p-8 max-w-md">
+          <div className="mb-6">
+            <svg 
+              className="w-24 h-24 mx-auto text-gray-300"
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={1.5}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Nenhum documento selecionado
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Escolha um dos documentos teóricos disponíveis na barra lateral para começar seus estudos
+          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Selecione o texto no PDF para interagir com a Atena</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col bg-gray-50 h-full">
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden" 
+        id="pdf-container"
+        style={{ height: 'calc(100% - 60px)' }}
+      >
+        <div className="p-6">
+          {loading && (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          )}
+          
+          {error && (
+            <div className="flex items-center justify-center py-20">
+              <p className="text-red-500">{error}</p>
+            </div>
+          )}
+
+          <Document
+            file={currentDocument.path}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={onDocumentLoadError}
+            loading={
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            {Array.from(new Array(numPages), (el, index) => (
+              <div
+                key={`page_${index + 1}`}
+                ref={(el) => { pageRefs.current[index + 1] = el; }}
+                className="mb-4 flex justify-center"
+              >
+                <Page
+                  pageNumber={index + 1}
+                  width={pageWidth * zoom}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="shadow-lg"
+                  loading={
+                    <div className="flex items-center justify-center bg-white shadow-lg" 
+                         style={{ width: pageWidth * zoom, height: (pageWidth * zoom) * 1.414 }}>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  }
+                />
+              </div>
+            ))}
+          </Document>
+        </div>
+      </div>
+      
+      <PDFControls />
+      
+      {/* Selection Menu */}
+      {selection && (
+        <SelectionMenu
+          selectedText={selection.text}
+          x={selection.x}
+          y={selection.y}
+          onClose={() => setSelection(null)}
+          onOpenChat={onOpenChat}
+        />
+      )}
+    </div>
+  );
+}
