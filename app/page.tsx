@@ -159,7 +159,7 @@ function HomeContent() {
         {currentDocument && !isMaximized && (
           <>
             <CopilotPopup
-              defaultOpen={sidebarOpen}
+              open={sidebarOpen}
               onSetOpen={setSidebarOpen}
               clickOutsideToClose={true}
               hitEscapeToClose={true}
