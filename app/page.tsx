@@ -122,7 +122,7 @@ function HomeContent() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden relative" style={{ height: 'calc(100vh - 80px)' }}>
+      <div className="flex-1 flex relative" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
         {/* Sidebar - Document List */}
         <aside className={`
           ${leftSidebarCollapsed ? 'w-0' : 'w-64'} 
@@ -152,7 +152,7 @@ function HomeContent() {
         )}
 
         {/* PDF Viewer */}
-        <main className="flex-1 min-w-0 h-full overflow-hidden">
+        <main className="flex-1 min-w-0 h-full overflow-auto">
           <PDFViewer onOpenChat={() => {
             setSidebarOpen(true);
             setPopupKey(prev => prev + 1); // Force re-mount of CopilotPopup

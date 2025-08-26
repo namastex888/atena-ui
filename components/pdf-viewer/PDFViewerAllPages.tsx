@@ -215,7 +215,7 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
 
   if (!currentDocument) {
     return (
-      <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 overflow-y-auto">
+      <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-y-auto">
         <div className="max-w-4xl mx-auto p-8">
           <div className="mb-8 text-center">
             <svg 
@@ -294,12 +294,12 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 h-full">
+    <div className="h-full flex flex-col bg-gray-50">
       <div 
         ref={containerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden" 
         id="pdf-container"
-        style={{ height: 'calc(100% - 60px)' }}
+        style={{ minHeight: 0 }}
       >
         <div className="p-6">
           {loading && (
