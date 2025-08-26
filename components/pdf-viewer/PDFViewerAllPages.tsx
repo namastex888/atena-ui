@@ -215,8 +215,8 @@ export function PDFViewer({ onOpenChat }: PDFViewerProps = {}) {
 
   if (!currentDocument) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
-        <div className="p-8 max-w-4xl">
+      <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-8">
           <div className="mb-8 text-center">
             <svg 
               className="w-20 h-20 mx-auto text-primary-400 mb-4"
